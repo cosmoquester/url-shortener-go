@@ -95,7 +95,7 @@ func main() {
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/", CreateShortUrl).Methods("POST")
 	router.HandleFunc("/{short_url}", ForwardUrl).Methods("GET")
-	router.HandleFunc("/{short_url}", ForwardUrl).Methods("DELETE")
+	router.HandleFunc("/{short_url}", DeleteUrl).Methods("DELETE")
 
 	rand.Seed(time.Now().UnixNano())
 	http.ListenAndServe(":5000", router)
