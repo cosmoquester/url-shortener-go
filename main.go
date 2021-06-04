@@ -92,6 +92,7 @@ func main() {
 	converterType := flag.String("converter", "file-urlmap", "type of URL converter \"urlmap\" or \"file-urlmap\"")
 	urlMapFilePath := flag.String("url-map-file", "url-mapping.csv", "file path mapping longurl to shorturl with \"file-urlmap\"")
 	urlLength := flag.Uint("url-length", 7, "the length of short url")
+	port := flag.String("port", "5000", "port number")
 	flag.Parse()
 
 	if *converterType == "urlmap" {
@@ -106,6 +107,7 @@ func main() {
 		log.Println("use file-urlmap mapping file path:", *urlMapFilePath)
 	}
 	log.Println("short url length: ", *urlLength)
+	log.Println("port:", *port)
 
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/", createShortURL).Methods("POST")
@@ -113,5 +115,5 @@ func main() {
 	router.HandleFunc("/{short_url}", deleteURL).Methods("DELETE")
 
 	rand.Seed(time.Now().UnixNano())
-	http.ListenAndServe(":5000", router)
+	http.ListenAndServe(":"+*port, router)
 }
