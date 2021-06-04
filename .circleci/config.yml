@@ -58,7 +58,7 @@ jobs:
       - run:
           name: Golint
           command: |
-            [[ -z $(go fmt) ]] && return 0 || return 1
+            [[ -z $(go fmt) ]] && true || false
             go vet
             golint -set_exit_status
 
