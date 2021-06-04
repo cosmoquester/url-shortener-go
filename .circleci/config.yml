@@ -59,6 +59,14 @@ jobs:
             go vet
             golint -set_exit_status
 
+      - when:
+          condition:
+            equal: [ master, << pipeline.git.branch >>]
+          steps:
+            - run:
+                name: Update Go Report
+                command: curl -XPOST https://goreportcard.com/checks -F repo="github.com/cosmoquester/url-shortener-go"
+
   run-test:
     executor: go-executor
 
@@ -73,21 +81,9 @@ jobs:
           name: Upload coverage to Codecov
           command: bash <(curl -s https://codecov.io/bash)
 
-  update-go-report:
-    executor: go-executor
-
-    steps:
-      - run:
-          name: Update Go Report
-          command: curl -XPOST https://goreportcard.com/checks -F repo="github.com/cosmoquester/url-shortener-go"
-
 workflows:
   main:
     jobs:
       - build-and-validate
       - check-linting
       - run-test
-      - update-go-report:
-        filters:
-          branches:
-            only: master
