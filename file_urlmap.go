@@ -105,6 +105,8 @@ func (urlmap *FileURLMap) writeToFile() {
 		defer file.Close()
 		writer := csv.NewWriter(bufio.NewWriter(file))
 
+		urlmap.mapLock.Lock()
+		defer urlmap.mapLock.Unlock()
 		for longURL, shortURL := range urlmap.longToShort {
 			writer.Write([]string{longURL, shortURL})
 		}
