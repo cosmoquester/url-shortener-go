@@ -27,18 +27,18 @@ func createShortURL(w http.ResponseWriter, req *http.Request) {
 	body := make(map[string]string)
 
 	if data, err = ioutil.ReadAll(req.Body); err != nil {
-		log.Println("Error occured:", err)
+		log.Println("Error occurred:", err)
 		return
 	}
 
 	if err := json.Unmarshal(data, &body); err != nil {
-		log.Println("Error occured:", err)
+		log.Println("Error occurred:", err)
 		return
 	}
 
 	longURL := body["long_url"]
 	if !validateURL(longURL) {
-		log.Println("Error occured: Invalid url form in creating")
+		log.Println("Error occurred: Invalid url form in creating")
 		http.Error(w, "Invalid url! the url must start with http or https", http.StatusBadRequest)
 		return
 	}
@@ -47,7 +47,7 @@ func createShortURL(w http.ResponseWriter, req *http.Request) {
 		log.Println("resource created ", longURL, "to", shortURL)
 		w.Write([]byte("{\"result\":true}"))
 	} else {
-		log.Println("Error occured in putting", err)
+		log.Println("Error occurred in putting", err)
 	}
 }
 
