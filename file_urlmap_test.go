@@ -1,15 +1,21 @@
 package main
 
 import (
+	"io/ioutil"
+	"os"
 	"testing"
 )
 
-func TestURLMap(t *testing.T) {
-	urlmap := URLMap{
-		shortToLong:    make(map[string]string),
-		longToShort:    make(map[string]string),
-		shortURLLength: 10,
+func TestFileURLMap(t *testing.T) {
+	var file_path string
+	if file, err := ioutil.TempFile("", "tmp"); err != nil {
+		t.Error("cannot use tmp file!")
+	} else {
+		file_path = file.Name()
 	}
+	defer os.Remove(file_path)
+
+	urlmap := NewFileURLMap(file_path, 10)
 
 	const originalLongURL = "helloworld"
 	var shortURL string
@@ -25,6 +31,7 @@ func TestURLMap(t *testing.T) {
 	if _, ok = urlmap.putURL(originalLongURL); ok {
 		t.Error("Duplicate long URL not handled!")
 	}
+
 	if longURL, ok = urlmap.getLongURL(shortURL); !ok {
 		t.Error("Get LongURL doesn't working!")
 	}
