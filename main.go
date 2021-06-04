@@ -88,11 +88,7 @@ func deleteURL(w http.ResponseWriter, req *http.Request) {
 }
 
 func main() {
-	converter = &URLMap{
-		shortToLong:    make(map[string]string),
-		longToShort:    make(map[string]string),
-		shortURLLength: 7,
-	}
+	converter = NewFileURLMap("url-mapping.csv", 7)
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/", createShortURL).Methods("POST")
 	router.HandleFunc("/{short_url}", forwardURL).Methods("GET")
