@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"flag"
 	"io/ioutil"
 	"log"
 	"math/rand"
@@ -88,7 +89,24 @@ func deleteURL(w http.ResponseWriter, req *http.Request) {
 }
 
 func main() {
-	converter = NewFileURLMap("url-mapping.csv", 7)
+	converterType := flag.String("converter", "file-urlmap", "type of URL converter \"urlmap\" or \"file-urlmap\"")
+	urlMapFilePath := flag.String("url-map-file", "url-mapping.csv", "file path mapping longurl to shorturl with \"file-urlmap\"")
+	urlLength := flag.Uint("url-length", 7, "the length of short url")
+	flag.Parse()
+
+	if *converterType == "urlmap" {
+		converter = &URLMap{
+			shortToLong:    make(map[string]string),
+			longToShort:    make(map[string]string),
+			shortURLLength: *urlLength,
+		}
+		log.Println("use urlmap, data will be deleted with end of process")
+	} else if *converterType == "file-urlmap" {
+		converter = NewFileURLMap(*urlMapFilePath, *urlLength)
+		log.Println("use file-urlmap mapping file path:", *urlMapFilePath)
+	}
+	log.Println("short url length: ", *urlLength)
+
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/", createShortURL).Methods("POST")
 	router.HandleFunc("/{short_url}", forwardURL).Methods("GET")
