@@ -8,7 +8,7 @@ import (
 const letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 const numLetters = len(letters)
 
-func generateRandomUrl(n uint) string {
+func generateRandomURL(n uint) string {
 	var result string
 
 	for ; n > 0; n-- {
@@ -17,7 +17,7 @@ func generateRandomUrl(n uint) string {
 	return result
 }
 
-func validateUrl(url string) bool {
+func validateURL(url string) bool {
 	if !strings.HasPrefix(url, "http://") && !strings.HasPrefix(url, "https://") {
 		return false
 	}
