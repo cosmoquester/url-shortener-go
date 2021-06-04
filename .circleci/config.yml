@@ -1,42 +1,13 @@
-version: 2
-jobs:
-  build-and-validate:
+version: 2.1
+
+executors:
+  go-executor:
+    working_directory: ~/url-shortener-go
     docker:
       - image: circleci/golang:1.16
 
-    steps:
-      - checkout
-
-      - restore_cache:
-          keys:
-            - go-mod-v4-{{ checksum "go.sum" }}
-
-      - run:
-          name: Go module download
-          command: go mod download
-
-      - save_cache:
-          key: go-mod-v4-{{ checksum "go.sum" }}
-          paths:
-            - "/go/pkg/mod"
-
-      - run:
-          name: Build Binary
-          command: go build
-
-      - run:
-          name: Start Application
-          command: ./url-shortener-go
-          background: true
-
-      - run:
-          name: Validate Application
-          command: curl --retry 10 --retry-delay 1 -XPOST localhost:5000/ -d '{"long_url":"http://www.naver.com"}'
-
-  check-linting:
-    docker:
-      - image: circleci/golang:1.16
-
+commands:
+  install-modules:
     steps:
       - checkout
 
@@ -55,16 +26,52 @@ jobs:
           paths:
             - "/go/pkg/mod"
 
+jobs:
+  build-and-validate:
+    executor: go-executor
+
+    steps:
+      - install-modules
+
       - run:
-          name: Golint
+          name: Build and Validate
+          command: go build
+
+      - run:
+          name: Start Application
+          command: ./url-shortener-go
+          background: true
+
+      - run:
+          name: Validate Application
+          command: curl --retry 10 --retry-delay 1 -XPOST localhost:5000/ -d '{"long_url":"http://www.naver.com"}'
+
+  check-linting:
+    executor: go-executor
+
+    steps:
+      - install-modules
+
+      - run:
+          name: Check Linting
           command: |
             [[ -z $(go fmt) ]] && true || false
             go vet
             golint -set_exit_status
 
+  run-test:
+    executor: go-executor
+
+    steps:
+      - install-modules
+
+      - run:
+          name: Run Tests
+          command: go test
+
 workflows:
-  version: 2
   main:
     jobs:
       - build-and-validate
       - check-linting
+      - run-test
