@@ -6,23 +6,19 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/gorilla/mux"
 )
 
-var mapper = UrlMap{
-	shortToLong: make(map[string]string),
-	longToShort: make(map[string]string),
+type UrlConverter interface {
+	getShortUrl(string) (string, bool)
+	getLongUrl(string) (string, bool)
+	PutUrl(string) (string, bool)
+	DelUrl(string) bool
 }
 
-func validUrl(url string) bool {
-	if !strings.HasPrefix(url, "http://") && !strings.HasPrefix(url, "https://") {
-		return false
-	}
-	return true
-}
+var converter UrlConverter
 
 func CreateShortUrl(w http.ResponseWriter, req *http.Request) {
 	var data []byte
@@ -40,14 +36,14 @@ func CreateShortUrl(w http.ResponseWriter, req *http.Request) {
 	}
 
 	longUrl := body["long_url"]
-	if !validUrl(longUrl) {
+	if !validateUrl(longUrl) {
 		log.Println("Error occured: Invalid url form in creating")
 		http.Error(w, "Invalid url! the url must start with http or https", http.StatusBadRequest)
 		return
 	}
 
-	if ok := mapper.PutUrl(longUrl); ok {
-		log.Println("resource created ", longUrl, "to", mapper.longToShort[longUrl])
+	if shortUrl, ok := converter.PutUrl(longUrl); ok {
+		log.Println("resource created ", longUrl, "to", shortUrl)
 		w.Write([]byte("{\"result\":true}"))
 	} else {
 		log.Println("Error occured in putting", err)
@@ -60,7 +56,7 @@ func ForwardUrl(w http.ResponseWriter, req *http.Request) {
 		log.Println("forward fail invalid form")
 		http.Error(w, "Invalid form!", http.StatusBadRequest)
 		return
-	} else if longUrl, ok := mapper.shortToLong[shortUrl]; !ok {
+	} else if longUrl, ok := converter.getLongUrl(shortUrl); !ok {
 		log.Println("forward failed non-existing shorturl", shortUrl)
 		http.Error(w, "Invalid short_url!", http.StatusNotFound)
 		return
@@ -76,11 +72,11 @@ func DeleteUrl(w http.ResponseWriter, req *http.Request) {
 		log.Println("forward failed invalid form")
 		http.Error(w, "Invalid form!", http.StatusBadRequest)
 		return
-	} else if longUrl, ok := mapper.shortToLong[shortUrl]; !ok {
+	} else if longUrl, ok := converter.getLongUrl(shortUrl); !ok {
 		log.Println("forward failed non-existing shortUrl")
 		http.Error(w, "Invalid short_url!", http.StatusNotFound)
 		return
-	} else if ok := mapper.DelUrl(shortUrl); !ok {
+	} else if ok := converter.DelUrl(shortUrl); !ok {
 		http.Error(w, "Internal Server error!", http.StatusInternalServerError)
 		return
 	} else {
@@ -91,6 +87,11 @@ func DeleteUrl(w http.ResponseWriter, req *http.Request) {
 }
 
 func main() {
+	converter = &UrlMap{
+		shortToLong:    make(map[string]string),
+		longToShort:    make(map[string]string),
+		shortUrlLength: 7,
+	}
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/", CreateShortUrl).Methods("POST")
 	router.HandleFunc("/{short_url}", ForwardUrl).Methods("GET")

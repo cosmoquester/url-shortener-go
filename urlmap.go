@@ -1,39 +1,36 @@
 package main
 
 import (
-	"math/rand"
 	"sync"
 )
 
 type UrlMap struct {
 	shortToLong, longToShort map[string]string
+	shortUrlLength           uint
 	sync.Mutex
 }
 
-const letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-const numLetters = len(letters)
-
-func generateRandomUrl(n int) string {
-	var result string
-
-	for ; n > 0; n-- {
-		result = result + string(letters[rand.Intn(numLetters)])
-	}
-	return result
+func (urlmap *UrlMap) getLongUrl(shortUrl string) (string, bool) {
+	longUrl, ok := urlmap.shortToLong[shortUrl]
+	return longUrl, ok
+}
+func (urlmap *UrlMap) getShortUrl(shortUrl string) (string, bool) {
+	shortUrl, ok := urlmap.shortToLong[shortUrl]
+	return shortUrl, ok
 }
 
-func (urlmap *UrlMap) PutUrl(longUrl string) bool {
+func (urlmap *UrlMap) PutUrl(longUrl string) (string, bool) {
 	if _, ok := urlmap.longToShort[longUrl]; ok {
-		return false
+		return "", false
 	}
 
-	shortCand := generateRandomUrl(7)
+	shortCand := generateRandomUrl(urlmap.shortUrlLength)
 	for {
 		_, ok := urlmap.shortToLong[shortCand]
 		if !ok {
 			break
 		}
-		shortCand = generateRandomUrl(7)
+		shortCand = generateRandomUrl(urlmap.shortUrlLength)
 	}
 
 	urlmap.Lock()
@@ -41,7 +38,7 @@ func (urlmap *UrlMap) PutUrl(longUrl string) bool {
 	urlmap.longToShort[longUrl] = shortCand
 	urlmap.Unlock()
 
-	return true
+	return shortCand, true
 }
 
 func (urlmap *UrlMap) DelUrl(shortUrl string) bool {
