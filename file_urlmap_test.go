@@ -7,15 +7,15 @@ import (
 )
 
 func TestFileURLMap(t *testing.T) {
-	var file_path string
+	var filepath string
 	if file, err := ioutil.TempFile("", "tmp"); err != nil {
 		t.Error("cannot use tmp file!")
 	} else {
-		file_path = file.Name()
+		filepath = file.Name()
 	}
-	defer os.Remove(file_path)
+	defer os.Remove(filepath)
 
-	urlmap := NewFileURLMap(file_path, 10)
+	urlmap := NewFileURLMap(filepath, 10)
 
 	const originalLongURL = "helloworld"
 	var shortURL string
