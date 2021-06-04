@@ -66,8 +66,12 @@ jobs:
       - install-modules
 
       - run:
-          name: Run Tests
-          command: go test
+          name: Run tests and coverage
+          command: go test -race -coverprofile=coverage.out -covermode=atomic
+
+      - run:
+          name: Upload coverage to Codecov
+          command: bash <(curl -s https://codecov.io/bash)
 
 workflows:
   main:
