@@ -1,10 +1,12 @@
-package main
+package urlconverter
 
 import (
 	"bufio"
 	"encoding/csv"
 	"os"
 	"sync"
+
+	"github.com/cosmoquester/url-shortener-go/utils"
 )
 
 // FileURLMap 은 LongURL와 ShortURL을 맵핑할 수 있는 map입니다.
@@ -50,27 +52,27 @@ func NewFileURLMap(filePath string, urlLength uint) *FileURLMap {
 	return &fileURLMap
 }
 
-func (urlmap *FileURLMap) getLongURL(shortURL string) (string, bool) {
+func (urlmap *FileURLMap) GetLongURL(shortURL string) (string, bool) {
 	longURL, ok := urlmap.shortToLong[shortURL]
 	return longURL, ok
 }
-func (urlmap *FileURLMap) getShortURL(longURL string) (string, bool) {
+func (urlmap *FileURLMap) GetShortURL(longURL string) (string, bool) {
 	shortURL, ok := urlmap.longToShort[longURL]
 	return shortURL, ok
 }
 
-func (urlmap *FileURLMap) putURL(longURL string) (string, bool) {
+func (urlmap *FileURLMap) PutURL(longURL string) (string, bool) {
 	if _, ok := urlmap.longToShort[longURL]; ok {
 		return "", false
 	}
 
-	shortCand := generateRandomURL(urlmap.shortURLLength)
+	shortCand := utils.GenerateRandomURL(urlmap.shortURLLength)
 	for {
 		_, ok := urlmap.shortToLong[shortCand]
 		if !ok {
 			break
 		}
-		shortCand = generateRandomURL(urlmap.shortURLLength)
+		shortCand = utils.GenerateRandomURL(urlmap.shortURLLength)
 	}
 
 	urlmap.mapLock.Lock()
@@ -82,7 +84,7 @@ func (urlmap *FileURLMap) putURL(longURL string) (string, bool) {
 	return shortCand, true
 }
 
-func (urlmap *FileURLMap) delURL(shortURL string) bool {
+func (urlmap *FileURLMap) DelURL(shortURL string) bool {
 	if longURL, ok := urlmap.shortToLong[shortURL]; ok {
 		urlmap.mapLock.Lock()
 		delete(urlmap.shortToLong, shortURL)
