@@ -52,15 +52,19 @@ func NewFileURLMap(filePath string, urlLength uint) *FileURLMap {
 	return &fileURLMap
 }
 
+// GetLongURL 은 입력된 shortURL에 대응되는 longURL을 반환합니다.
 func (urlmap *FileURLMap) GetLongURL(shortURL string) (string, bool) {
 	longURL, ok := urlmap.shortToLong[shortURL]
 	return longURL, ok
 }
+
+// GetShortURL 은 입력된 longURL에 대응되는 shortURL을 반환합니다.
 func (urlmap *FileURLMap) GetShortURL(longURL string) (string, bool) {
 	shortURL, ok := urlmap.longToShort[longURL]
 	return shortURL, ok
 }
 
+// PutURL 은 longURL에 해당하는 shortURL을 생성해 mapping하고 shortURL을 반환합니다.
 func (urlmap *FileURLMap) PutURL(longURL string) (string, bool) {
 	if _, ok := urlmap.longToShort[longURL]; ok {
 		return "", false
@@ -84,6 +88,7 @@ func (urlmap *FileURLMap) PutURL(longURL string) (string, bool) {
 	return shortCand, true
 }
 
+// DelURL 은 해당하는 shortURL 맵핑을 삭제합니다.
 func (urlmap *FileURLMap) DelURL(shortURL string) bool {
 	if longURL, ok := urlmap.shortToLong[shortURL]; ok {
 		urlmap.mapLock.Lock()

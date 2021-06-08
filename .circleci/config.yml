@@ -55,9 +55,9 @@ jobs:
       - run:
           name: Check Linting
           command: |
-            [[ -z $(go fmt) ]] && true || false
-            go vet
-            golint -set_exit_status
+            [[ -z $(go fmt ./...) ]] && true || false
+            go vet ./...
+            golint -set_exit_status ./...
 
       - when:
           condition:

@@ -22,15 +22,19 @@ func NewURLMap(urlLength uint) *URLMap {
 	}
 }
 
+// GetLongURL 은 입력된 shortURL에 대응되는 longURL을 반환합니다.
 func (urlmap *URLMap) GetLongURL(shortURL string) (string, bool) {
 	longURL, ok := urlmap.shortToLong[shortURL]
 	return longURL, ok
 }
+
+// GetShortURL 은 입력된 longURL에 대응되는 shortURL을 반환합니다.
 func (urlmap *URLMap) GetShortURL(shortURL string) (string, bool) {
 	shortURL, ok := urlmap.shortToLong[shortURL]
 	return shortURL, ok
 }
 
+// PutURL 은 longURL에 해당하는 shortURL을 생성해 mapping하고 shortURL을 반환합니다.
 func (urlmap *URLMap) PutURL(longURL string) (string, bool) {
 	if _, ok := urlmap.longToShort[longURL]; ok {
 		return "", false
@@ -53,6 +57,7 @@ func (urlmap *URLMap) PutURL(longURL string) (string, bool) {
 	return shortCand, true
 }
 
+// DelURL 은 해당하는 shortURL 맵핑을 삭제합니다.
 func (urlmap *URLMap) DelURL(shortURL string) bool {
 	longURL, ok := urlmap.shortToLong[shortURL]
 	if !ok {
