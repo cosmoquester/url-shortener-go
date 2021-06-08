@@ -93,8 +93,12 @@ func main() {
 		converter = urlconverter.NewURLMap(*urlLength)
 		log.Println("use urlmap, data will be deleted with end of process")
 	} else if *converterType == "file-urlmap" {
-		converter = urlconverter.NewFileURLMap(*urlMapFilePath, *urlLength)
-		log.Println("use file-urlmap mapping file path:", *urlMapFilePath)
+		fileURLMap, err := urlconverter.NewFileURLMap(*urlMapFilePath, *urlLength)
+		if err != nil {
+			log.Fatal("error occured with file path: ", *urlMapFilePath, err)
+		}
+		converter = fileURLMap
+		log.Println("use file-urlmap mapping file path: ", *urlMapFilePath)
 	}
 	log.Println("short url length: ", *urlLength)
 	log.Println("port:", *port)

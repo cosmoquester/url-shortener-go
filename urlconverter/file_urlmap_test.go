@@ -15,7 +15,7 @@ func TestFileURLMap(t *testing.T) {
 	}
 	defer os.Remove(filepath)
 
-	urlmap := NewFileURLMap(filepath, 10)
+	urlmap, _ := NewFileURLMap(filepath, 10)
 
 	const originalLongURL = "helloworld"
 	var shortURL string
