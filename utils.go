@@ -18,8 +18,5 @@ func generateRandomURL(n uint) string {
 }
 
 func validateURL(url string) bool {
-	if !strings.HasPrefix(url, "http://") && !strings.HasPrefix(url, "https://") {
-		return false
-	}
-	return true
+	return strings.HasPrefix(url, "http://") || strings.HasPrefix(url, "https://")
 }

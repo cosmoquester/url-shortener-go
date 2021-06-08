@@ -43,12 +43,13 @@ func (urlmap *URLMap) putURL(longURL string) (string, bool) {
 }
 
 func (urlmap *URLMap) delURL(shortURL string) bool {
-	if longURL, ok := urlmap.shortToLong[shortURL]; ok {
-		urlmap.Lock()
-		delete(urlmap.shortToLong, shortURL)
-		delete(urlmap.longToShort, longURL)
-		urlmap.Unlock()
-		return true
+	longURL, ok := urlmap.shortToLong[shortURL]
+	if !ok {
+		return false
 	}
-	return false
+	urlmap.Lock()
+	delete(urlmap.shortToLong, shortURL)
+	delete(urlmap.longToShort, longURL)
+	urlmap.Unlock()
+	return true
 }
