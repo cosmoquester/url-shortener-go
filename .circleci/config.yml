@@ -75,7 +75,7 @@ jobs:
 
       - run:
           name: Run tests and coverage
-          command: go test -race -coverprofile=coverage.out -covermode=atomic
+          command: go test ./... -race -coverprofile=coverage.out -covermode=atomic
 
       - run:
           name: Upload coverage to Codecov

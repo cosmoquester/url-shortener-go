@@ -1,4 +1,4 @@
-package main
+package utils
 
 import (
 	"math/rand"
@@ -8,7 +8,7 @@ import (
 const letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 const numLetters = len(letters)
 
-func generateRandomURL(n uint) string {
+func GenerateRandomURL(n uint) string {
 	var result string
 
 	for ; n > 0; n-- {
@@ -17,6 +17,6 @@ func generateRandomURL(n uint) string {
 	return result
 }
 
-func validateURL(url string) bool {
+func ValidateURL(url string) bool {
 	return strings.HasPrefix(url, "http://") || strings.HasPrefix(url, "https://")
 }

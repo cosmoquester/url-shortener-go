@@ -1,4 +1,4 @@
-package main
+package utils
 
 import (
 	"testing"
@@ -7,8 +7,8 @@ import (
 func TestGenerateRandomURL(t *testing.T) {
 	var str1, str2 string
 
-	str1 = generateRandomURL(10)
-	str2 = generateRandomURL(10)
+	str1 = GenerateRandomURL(10)
+	str2 = GenerateRandomURL(10)
 
 	if str1 == str2 {
 		t.Error("random logit is not working!")
@@ -26,7 +26,7 @@ func TestValidateURL(t *testing.T) {
 	}
 
 	for _, testCase := range cases {
-		if validateURL(testCase.URL) != testCase.IsValid {
+		if ValidateURL(testCase.URL) != testCase.IsValid {
 			t.Error("url validation failed!")
 		}
 	}

@@ -9,18 +9,12 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/cosmoquester/url-shortener-go/urlconverter"
+	"github.com/cosmoquester/url-shortener-go/utils"
 	"github.com/gorilla/mux"
 )
 
-// URLConverter 는 LongURL과 ShortURL을 기록하고 변환하고 삭제할 수 있는 interface입니다.
-type URLConverter interface {
-	getShortURL(string) (string, bool)
-	getLongURL(string) (string, bool)
-	putURL(string) (string, bool)
-	delURL(string) bool
-}
-
-var converter URLConverter
+var converter urlconverter.URLConverter
 
 func createShortURL(w http.ResponseWriter, req *http.Request) {
 	var data []byte
@@ -38,13 +32,13 @@ func createShortURL(w http.ResponseWriter, req *http.Request) {
 	}
 
 	longURL := body["long_url"]
-	if !validateURL(longURL) {
+	if !utils.ValidateURL(longURL) {
 		log.Println("Error occurred: Invalid url form in creating")
 		http.Error(w, "Invalid url! the url must start with http or https", http.StatusBadRequest)
 		return
 	}
 
-	if shortURL, ok := converter.putURL(longURL); ok {
+	if shortURL, ok := converter.PutURL(longURL); ok {
 		log.Println("resource created ", longURL, "to", shortURL)
 		w.Write([]byte("{\"result\":true}"))
 	} else {
@@ -58,7 +52,7 @@ func forwardURL(w http.ResponseWriter, req *http.Request) {
 		log.Println("forward fail invalid form")
 		http.Error(w, "Invalid form!", http.StatusBadRequest)
 		return
-	} else if longURL, ok := converter.getLongURL(shortURL); !ok {
+	} else if longURL, ok := converter.GetLongURL(shortURL); !ok {
 		log.Println("forward failed non-existing shorturl", shortURL)
 		http.Error(w, "Invalid short_url!", http.StatusNotFound)
 		return
@@ -74,11 +68,11 @@ func deleteURL(w http.ResponseWriter, req *http.Request) {
 		log.Println("forward failed invalid form")
 		http.Error(w, "Invalid form!", http.StatusBadRequest)
 		return
-	} else if longURL, ok := converter.getLongURL(shortURL); !ok {
+	} else if longURL, ok := converter.GetLongURL(shortURL); !ok {
 		log.Println("forward failed non-existing shortURL")
 		http.Error(w, "Invalid short_url!", http.StatusNotFound)
 		return
-	} else if ok := converter.delURL(shortURL); !ok {
+	} else if ok := converter.DelURL(shortURL); !ok {
 		http.Error(w, "Internal Server error!", http.StatusInternalServerError)
 		return
 	} else {
@@ -96,14 +90,10 @@ func main() {
 	flag.Parse()
 
 	if *converterType == "urlmap" {
-		converter = &URLMap{
-			shortToLong:    make(map[string]string),
-			longToShort:    make(map[string]string),
-			shortURLLength: *urlLength,
-		}
+		converter = urlconverter.NewURLMap(*urlLength)
 		log.Println("use urlmap, data will be deleted with end of process")
 	} else if *converterType == "file-urlmap" {
-		converter = NewFileURLMap(*urlMapFilePath, *urlLength)
+		converter = urlconverter.NewFileURLMap(*urlMapFilePath, *urlLength)
 		log.Println("use file-urlmap mapping file path:", *urlMapFilePath)
 	}
 	log.Println("short url length: ", *urlLength)
