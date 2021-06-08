@@ -99,17 +99,17 @@ func (urlmap *FileURLMap) writeToFile() {
 	urlmap.fileLock.Lock()
 	defer urlmap.fileLock.Unlock()
 
-	if file, err := os.Create(urlmap.filePath); err != nil {
+	file, err := os.Create(urlmap.filePath)
+	if err != nil {
 		panic("cannot write to file")
-	} else {
-		defer file.Close()
-		writer := csv.NewWriter(bufio.NewWriter(file))
-
-		urlmap.mapLock.Lock()
-		defer urlmap.mapLock.Unlock()
-		for longURL, shortURL := range urlmap.longToShort {
-			writer.Write([]string{longURL, shortURL})
-		}
-		writer.Flush()
 	}
+	defer file.Close()
+	writer := csv.NewWriter(bufio.NewWriter(file))
+
+	urlmap.mapLock.Lock()
+	defer urlmap.mapLock.Unlock()
+	for longURL, shortURL := range urlmap.longToShort {
+		writer.Write([]string{longURL, shortURL})
+	}
+	writer.Flush()
 }

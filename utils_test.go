@@ -1,6 +1,8 @@
 package main
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestGenerateRandomURL(t *testing.T) {
 	var str1, str2 string
@@ -14,11 +16,18 @@ func TestGenerateRandomURL(t *testing.T) {
 }
 
 func TestValidateURL(t *testing.T) {
-	if validateURL("naver.com") {
-		t.Error("url validation failed!")
-	} else if !validateURL("https://a.a") {
-		t.Error("url validation failed!")
-	} else if validateURL("http:/hello.com") {
-		t.Error("url validation failed!")
+	cases := []struct {
+		URL     string
+		IsValid bool
+	}{
+		{"naver.com", false},
+		{"https://a.a", true},
+		{"http:/hello.com", false},
+	}
+
+	for _, testCase := range cases {
+		if validateURL(testCase.URL) != testCase.IsValid {
+			t.Error("url validation failed!")
+		}
 	}
 }
