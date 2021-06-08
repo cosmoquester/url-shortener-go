@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"encoding/csv"
 	"os"
+	"path/filepath"
 	"sync"
 
 	"github.com/cosmoquester/url-shortener-go/utils"
@@ -21,7 +22,7 @@ type FileURLMap struct {
 
 // NewFileURLMap 은 지정한 파일경로에 url mapping을 기록하는 FileURLMap를 생성합니다.
 // 이미 해당 경로에 파일이 있을 경우 그 Mapping정보를 불러와 사용합니다.
-func NewFileURLMap(filePath string, urlLength uint) *FileURLMap {
+func NewFileURLMap(filePath string, urlLength uint) (*FileURLMap, error) {
 	fileURLMap := FileURLMap{
 		shortToLong:    make(map[string]string),
 		longToShort:    make(map[string]string),
@@ -29,17 +30,20 @@ func NewFileURLMap(filePath string, urlLength uint) *FileURLMap {
 		filePath:       filePath,
 	}
 
-	var file *os.File
-	var rows [][]string
+	if err := os.MkdirAll(filepath.Dir(filePath), os.ModeDir); err != nil {
+		return nil, err
+	}
+
 	if _, err := os.Stat(filePath); err == nil {
-		if file, err = os.Open(filePath); err != nil {
-			panic("cannot read file")
+		file, err := os.Open(filePath)
+		if err != nil {
+			return nil, err
 		}
 
 		defer file.Close()
-		reader := csv.NewReader(bufio.NewReader(file))
-		if rows, err = reader.ReadAll(); err != nil {
-			panic("cannot read csv file")
+		rows, err := csv.NewReader(bufio.NewReader(file)).ReadAll()
+		if err != nil {
+			return nil, err
 		}
 
 		for _, row := range rows {
@@ -49,7 +53,7 @@ func NewFileURLMap(filePath string, urlLength uint) *FileURLMap {
 		}
 	}
 
-	return &fileURLMap
+	return &fileURLMap, nil
 }
 
 // GetLongURL 은 입력된 shortURL에 대응되는 longURL을 반환합니다.
