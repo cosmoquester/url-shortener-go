@@ -23,29 +23,37 @@ func TestFileURLMap(t *testing.T) {
 	var ok bool
 	if shortURL, ok = urlmap.PutURL(originalLongURL); !ok {
 		t.Error("URLMap doesn't work sucessfully!")
+		return
 	}
 	if len(shortURL) != 10 {
 		t.Error("ShortURL length is not same!")
+		return
 	}
 
 	if _, ok = urlmap.PutURL(originalLongURL); ok {
 		t.Error("Duplicate long URL not handled!")
+		return
 	}
 
 	if longURL, ok = urlmap.GetLongURL(shortURL); !ok {
 		t.Error("Get LongURL doesn't working!")
+		return
 	}
 	if longURL != originalLongURL {
 		t.Error("Original retrieved longurl is diffrent from original url!")
+		return
 	}
 
 	if urlmap.DelURL("none_short_url") {
 		t.Error("Deleting non-existing short url doesn't handled!")
+		return
 	}
 	if !urlmap.DelURL(shortURL) {
 		t.Error("Error occured in deleting short url!")
+		return
 	}
 	if _, ok = urlmap.GetLongURL(shortURL); ok {
 		t.Error("Deleting non-existing short url didn't work!")
+		return
 	}
 }
