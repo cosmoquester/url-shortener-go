@@ -27,7 +27,7 @@ func TestValidateURL(t *testing.T) {
 
 	for _, testCase := range cases {
 		if ValidateURL(testCase.URL) != testCase.IsValid {
-			t.Error("url validation failed!")
+			t.Errorf("url validation failed! \"URL: %v\", \"isValid: %v\"", testCase.URL, testCase.IsValid)
 		}
 	}
 }
