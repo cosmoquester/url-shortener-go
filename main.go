@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"flag"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"math/rand"
@@ -23,11 +24,13 @@ func createShortURL(w http.ResponseWriter, req *http.Request) {
 
 	if data, err = ioutil.ReadAll(req.Body); err != nil {
 		log.Println("Error occurred:", err)
+		http.Error(w, "Cannot read request!", http.StatusBadRequest)
 		return
 	}
 
 	if err := json.Unmarshal(data, &body); err != nil {
 		log.Println("Error occurred:", err)
+		http.Error(w, "Cannot parse as json!", http.StatusBadRequest)
 		return
 	}
 
@@ -40,9 +43,10 @@ func createShortURL(w http.ResponseWriter, req *http.Request) {
 
 	if shortURL, ok := converter.PutURL(longURL); ok {
 		log.Println("resource created ", longURL, "to", shortURL)
-		w.Write([]byte("{\"result\":true}"))
+		w.Write([]byte(fmt.Sprintf("{\"result\":true, \"short_url\":%s}", shortURL)))
 	} else {
 		log.Println("Error occurred in putting", err)
+		http.Error(w, fmt.Sprintf("long url: %s is already exists!", longURL), http.StatusConflict)
 	}
 }
 
@@ -65,14 +69,15 @@ func forwardURL(w http.ResponseWriter, req *http.Request) {
 func deleteURL(w http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 	if shortURL, ok := vars["short_url"]; !ok {
-		log.Println("forward failed invalid form")
+		log.Println("deletion failed invalid form")
 		http.Error(w, "Invalid form!", http.StatusBadRequest)
 		return
 	} else if longURL, ok := converter.GetLongURL(shortURL); !ok {
-		log.Println("forward failed non-existing shortURL")
+		log.Println("deletion failed non-existing shortURL")
 		http.Error(w, "Invalid short_url!", http.StatusNotFound)
 		return
 	} else if ok := converter.DelURL(shortURL); !ok {
+		log.Println("deletion failed")
 		http.Error(w, "Internal Server error!", http.StatusInternalServerError)
 		return
 	} else {
