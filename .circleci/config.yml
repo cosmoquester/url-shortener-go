@@ -59,15 +59,6 @@ jobs:
             go vet ./...
             golint -set_exit_status ./...
 
-      - when:
-          condition:
-            equal: [ master, << pipeline.git.branch >>]
-
-          steps:
-            - run:
-                name: Update Go Report
-                command: curl -XPOST https://goreportcard.com/checks -F repo="github.com/cosmoquester/url-shortener-go"
-
   run-test:
     executor: go-executor
 
@@ -119,6 +110,14 @@ jobs:
                   echo $DOCKER_ACCESS_TOKEN | docker login --username $DOCKER_USER_NAME --password-stdin
                   docker push $DOCKER_IMAGE_NAME
 
+  go-report-upload:
+      executor: go-executor
+
+      steps:
+        - run:
+            name: Update Go Report
+            command: curl -XPOST https://goreportcard.com/checks -F repo="github.com/cosmoquester/url-shortener-go"
+
 workflows:
   main:
     jobs:
@@ -132,4 +131,8 @@ workflows:
             tags:
               only: /.+/
             branches:
-              only: /.master/
+              only: /master/
+      - go-report-upload:
+          filters:
+            branches:
+              only: /master/
