@@ -62,6 +62,7 @@ jobs:
       - when:
           condition:
             equal: [ master, << pipeline.git.branch >>]
+
           steps:
             - run:
                 name: Update Go Report
@@ -81,9 +82,54 @@ jobs:
           name: Upload coverage to Codecov
           command: bash <(curl -s https://codecov.io/bash)
 
+  docker-image-build:
+    executor: go-executor
+
+    steps:
+      - checkout
+
+      - setup_remote_docker:
+          version: 20.10.6
+
+      - when:
+          condition:
+            equal: [ master, << pipeline.git.branch >>]
+
+          steps:
+            - run:
+                name: Docker Image Build and Push Latest
+                command: |
+                  DOCKER_IMAGE_NAME="$DOCKER_USER_NAME/url-shortener-go"
+                  docker build -t $DOCKER_IMAGE_NAME .
+                  echo $DOCKER_ACCESS_TOKEN | docker login --username $DOCKER_USER_NAME --password-stdin
+                  docker push $DOCKER_IMAGE_NAME
+
+      - when:
+          condition:
+            matches:
+              pattern: ".+"
+              value: << pipeline.git.tag >>
+
+          steps:
+            - run:
+                name: Docker Image Build and Push Tag
+                command: |
+                  DOCKER_IMAGE_NAME="$DOCKER_USER_NAME/url-shortener-go:$CIRCLE_TAG"
+                  docker build -t $DOCKER_IMAGE_NAME .
+                  echo $DOCKER_ACCESS_TOKEN | docker login --username $DOCKER_USER_NAME --password-stdin
+                  docker push $DOCKER_IMAGE_NAME
+
 workflows:
   main:
     jobs:
       - build-and-validate
       - check-linting
       - run-test
+      - docker-image-build:
+          context:
+            - Docker
+          filters:
+            tags:
+              only: /.+/
+            branches:
+              only: /.master/
