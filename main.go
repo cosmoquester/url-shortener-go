@@ -100,7 +100,7 @@ func main() {
 	} else if *converterType == "file-urlmap" {
 		fileURLMap, err := urlconverter.NewFileURLMap(*urlMapFilePath, *urlLength)
 		if err != nil {
-			log.Fatal("error occured with file path: ", *urlMapFilePath, err)
+			log.Fatal("error occurred with file path: ", *urlMapFilePath, err)
 		}
 		converter = fileURLMap
 		log.Println("use file-urlmap mapping file path: ", *urlMapFilePath)

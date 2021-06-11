@@ -22,7 +22,7 @@ func TestFileURLMap(t *testing.T) {
 	var longURL string
 	var ok bool
 	if shortURL, ok = urlmap.PutURL(originalLongURL); !ok {
-		t.Error("URLMap doesn't work sucessfully!")
+		t.Error("URLMap doesn't work successfully!")
 		return
 	}
 	if len(shortURL) != 10 {
@@ -40,7 +40,7 @@ func TestFileURLMap(t *testing.T) {
 		return
 	}
 	if longURL != originalLongURL {
-		t.Error("Original retrieved longurl is diffrent from original url!")
+		t.Error("Original retrieved longurl is different from original url!")
 		return
 	}
 
@@ -49,7 +49,7 @@ func TestFileURLMap(t *testing.T) {
 		return
 	}
 	if !urlmap.DelURL(shortURL) {
-		t.Error("Error occured in deleting short url!")
+		t.Error("Error occurred in deleting short url!")
 		return
 	}
 	if _, ok = urlmap.GetLongURL(shortURL); ok {
